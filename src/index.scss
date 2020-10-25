@@ -1,0 +1,17 @@
+$pf-global--enable-reset: 'true';
+@import '~@patternfly/patternfly/patternfly.css';
+
+.pf-c-page__header-brand-link img {
+    max-width: 80px;
+}
+
+.ct-c-logout > * {
+    display: inline;
+    margin-right: var(--pf-global--spacer--xs);
+}
+
+.ct-c-main--info > * {
+    &:first { margin: var(--pf-global--spacer--xl); }
+    max-width: 500px;
+    text-align: center;
+}

@@ -4,9 +4,7 @@ import { Route, withRouter } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const PrivateRoute = ({ component: Component, path, location, ...rest }) => {
-    const { isAuthenticated, loginWithRedirect, ...data } = useAuth0();
-
-    console.log(isAuthenticated, rest, data, 'ffff');
+    const { isAuthenticated, loginWithRedirect } = useAuth0();
 
     useEffect(() => {
         const fn = async () => {
