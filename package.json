@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "dev": "nodemon",
-    "start": "node server",
+    "start": "node server/index.js",
     "lint": "eslint ./src",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage",
     "start:web": "PUBLIC_URL=/ react-scripts start",
@@ -43,6 +43,7 @@
     "helmet": "^4.1.1",
     "history": "^5.0.0",
     "http-proxy-middleware": "^1.0.6",
+    "lru-cache": "^6.0.0",
     "morgan": "^1.10.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -59,7 +60,7 @@
     "nock": "^10.0.0",
     "nodemon": "^2.0.6",
     "prettier": "^2.1.2",
-    "smee-client": "^1.0.2"
+    "smee-client": "^1.2.2"
   },
   "engines": {
     "node": ">= 8.3.0"
