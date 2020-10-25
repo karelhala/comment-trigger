@@ -7,7 +7,7 @@ module.exports = (app, config) => {
         const smee = new SmeeClient({
             logger: console,
             source: config.webhookProxyUrl,
-            target: `http://localhost:${config.port || 3000}`,
+            target: `http://localhost:${config.port || 3000}${config.webhooksPath}`,
         });
         smee.start();
     }
@@ -26,5 +26,5 @@ module.exports = (app, config) => {
 
     Object.entries(hooks).forEach(([key, callback]) => webhooks.on(key, (hook) => callback(hook, app)));
 
-    app.use(webhooks.middleware);
+    app.use(config.webhooksPath, webhooks.middleware);
 };

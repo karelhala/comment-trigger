@@ -22,7 +22,7 @@ app.use(
         },
     })
 );
-app.use(express.static(join(__dirname, 'build')));
+app.use(express.static(join(__dirname, '../build')));
 bootstrap(app, config);
 
-app.listen(config.port, '0.0.0.0', () => console.log(`Server listening on port ${config.port}`));
+app.listen(config.port, () => console.log(`Server listening on port ${config.port}`));

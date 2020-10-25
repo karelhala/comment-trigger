@@ -24,7 +24,7 @@
     "lint": "eslint ./src",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage",
     "start:web": "PUBLIC_URL=/ react-scripts start",
-    "build:web": "PUBLIC_URL=/ react-scripts build",
+    "build": "PUBLIC_URL=/ react-scripts build",
     "test:web": "react-scripts test",
     "eject": "react-scripts eject"
   },
