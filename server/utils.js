@@ -5,6 +5,7 @@ module.exports = {
         appId: process.env.APP_ID,
         clientSecret: process.env.WEBHOOK_SECRET || 'development',
         webhooksPath: `/${process.env.WEBHOOK_PATH}` || '',
-        port: process.env.PORT || 3000,
+        port: process.env.PORT || 4000,
+        dbUrl: process.env.DATABASE_URL,
     }),
 };
