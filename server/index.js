@@ -11,7 +11,7 @@ const { listEnabledRepositories, createNewToken } = require('./appInfo');
 
 const config = buildConfig();
 
-// db(config).init();
+db(config).init();
 
 const app = express();
 
