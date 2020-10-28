@@ -15,7 +15,7 @@ import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon
 import { useAuth0 } from '@auth0/auth0-react';
 import logo from '../static/logo_transparent_2.png';
 
-const Header = () => {
+const Header = ({ onNewInstallation }) => {
     const [isOpen, setIsOpen] = useState(false);
     const { logout, user } = useAuth0();
     return (
@@ -34,7 +34,7 @@ const Header = () => {
                             </DropdownToggle>
                         }
                         dropdownItems={[
-                            <DropdownItem key="new-organization" component="button">
+                            <DropdownItem key="new-organization" component="button" onClick={() => onNewInstallation()}>
                                 <Text>New installation</Text>
                             </DropdownItem>,
                             <DropdownSeparator key="logout-separator" />,

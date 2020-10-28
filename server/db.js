@@ -12,20 +12,14 @@ module.exports = ({ dbUrl }) => ({
             refresh_token_expires timestamp
         );`);
     },
-    setTokensForUser: (user, token, refreshToken) => {
-        const currDate = new Date();
-        const tokenExpires = new Date(currDate.setDate(currDate.getDate() + 8));
-        const refreshTokenExpires = new Date(currDate.setMonth(currDate.getMonth() + 9)).getTime();
-        getDb(dbUrl).one(
-            `INSERT INTO auth_tokens (username, token, refresh_token, token_expires, refresh_token_expires)
-        VALUES($1, $2, $3, $4, $5) 
+    setTokensForUser: (user, token) => {
+        getDb(dbUrl).query(
+            `INSERT INTO auth_tokens (username, token)
+        VALUES($1, $2) 
         ON CONFLICT (username) 
         DO
-            UPDATE SET token = $2,
-            refresh_token = $3,
-            token_expires = $4,
-            refresh_token_expires = $5;`,
-            [user, token, refreshToken, tokenExpires, refreshTokenExpires]
+            UPDATE SET token = $2;`,
+            [user, token]
         );
     },
     getTokensForUser: (user) => getDb(dbUrl).one(`SELECT token from auth_tokens WHERE username = $1`, [user]),

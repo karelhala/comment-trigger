@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Grid, GridItem, Tabs, Tab, TabTitleText, CardBody, Card } from '@patternfly/react-core';
 import PlusCircleIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-const RepositoryTabs = () => {
+const RepositoryTabs = ({ onNewInstallation }) => {
     const [activeTabKey, setActiveTabKey] = useState(0);
     const { user } = useAuth0();
     const [{ isLoading, repositories }, setRepositories] = useState({
@@ -48,7 +49,7 @@ const RepositoryTabs = () => {
                 if (active) {
                     setActiveTabKey(active);
                 } else {
-                    // call add app
+                    onNewInstallation();
                 }
             }}
             variant="light300"
@@ -70,6 +71,14 @@ const RepositoryTabs = () => {
             <Tab title={<PlusCircleIcon />} />
         </Tabs>
     );
+};
+
+RepositoryTabs.propTypes = {
+    onNewInstallation: PropTypes.func,
+};
+
+RepositoryTabs.defaultProps = {
+    onNewInstallation: () => undefined,
 };
 
 export default RepositoryTabs;
