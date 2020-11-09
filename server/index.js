@@ -11,7 +11,7 @@ const { listEnabledRepositories, createNewToken } = require('./appInfo');
 
 const config = buildConfig();
 
-db(config).init();
+const connection = db.init(config);
 
 const app = express();
 
@@ -30,11 +30,11 @@ app.use(
     })
 );
 app.use(express.static(join(__dirname, '../build')));
-app.use('/token/:userName', createNewToken(db(config)));
-app.use('/enabled/:userName', listEnabledRepositories(db(config)));
+app.use('/token/:userName', createNewToken(connection));
+app.use('/enabled/:userName', listEnabledRepositories(connection));
 bootstrap(app, {
     ...config,
-    db: db(config),
+    connection,
 });
 
 app.listen(config.port, () => console.log(`Server listening on port ${config.port}`));

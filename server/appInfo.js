@@ -1,5 +1,9 @@
 const { createAppAuth } = require('@octokit/auth-app');
 const { request } = require('@octokit/request');
+const crypto = require('crypto');
+const db = require('./db');
+
+const algorithm = 'aes-192-cbc';
 
 const auth = createAppAuth({
     id: process.env.APP_ID,
@@ -14,20 +18,33 @@ const newAuthToken = (code) =>
         code,
     });
 
+const encode = (toEncode) => {
+    const iv = crypto.randomBytes(parseInt(process.env.IV_LENGTH, 10));
+    const cypher = crypto.createCipheriv(algorithm, crypto.scryptSync(process.env.TOKEN_PWD, 'GfG', 24), iv);
+    let encoded = cypher.update(toEncode, 'utf8', 'hex');
+    encoded += cypher.final('hex');
+    return `${iv.toString('hex')}:${encoded}`;
+};
+
+const decode = (toDecode) => {
+    const textParts = toDecode.split(':');
+    const iv = Buffer.from(textParts.shift(), 'hex');
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv(algorithm, crypto.scryptSync(process.env.TOKEN_PWD, 'GfG', 24), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+};
+
 module.exports = {
-    createNewToken: (db) => async ({ params, body }, res) => {
+    createNewToken: (connection) => async ({ params, body }, res) => {
         const { token } = await newAuthToken(body.code);
-        const cypher = crypto.createCipher('aes-128-cbc', process.env.TOKEN_PWD);
-        let encoded = cypher.update(token, 'utf8', 'hex');
-        encoded += cypher.final('hex');
-        await db.setTokensForUser(params.userName, encoded);
+        await db.setTokensForUser(connection, params.userName, encode(token));
         res.json({});
     },
-    listEnabledRepositories: (db) => async ({ params }, res) => {
-        const { token } = (await db.getTokensForUser(params.userName)) || {};
-        const cypher = crypto.createDecipher('aes-128-cbc', process.env.TOKEN_PWD);
-        let decoded = cypher.update(token, 'hex', 'utf8');
-        decoded += cypher.final('utf8');
+    listEnabledRepositories: (connection) => async ({ params }, res) => {
+        const { token } = (await db.getTokensForUser(connection, params.userName)) || {};
+        const decoded = decode(token);
         try {
             const {
                 data: { installations },

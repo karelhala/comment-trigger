@@ -2,18 +2,21 @@ const pgp = require('pg-promise')();
 
 const getDb = (dbUrl) => pgp(dbUrl);
 
-module.exports = ({ dbUrl }) => ({
-    init: () => {
-        getDb(dbUrl).query(`CREATE TABLE IF NOT EXISTS auth_tokens (
+module.exports = {
+    init: ({ dbUrl }) => {
+        const connection = getDb(dbUrl);
+        connection.query(`CREATE TABLE IF NOT EXISTS auth_tokens (
             username varchar(80) PRIMARY KEY,
-            token varchar(80),
+            token TEXT,
             refresh_token varchar(80),
             token_expires timestamp,
             refresh_token_expires timestamp
         );`);
+
+        return connection;
     },
-    setTokensForUser: (user, token) => {
-        getDb(dbUrl).query(
+    setTokensForUser: (connection, user, token) => {
+        connection.query(
             `INSERT INTO auth_tokens (username, token)
         VALUES($1, $2) 
         ON CONFLICT (username) 
@@ -22,5 +25,5 @@ module.exports = ({ dbUrl }) => ({
             [user, token]
         );
     },
-    getTokensForUser: (user) => getDb(dbUrl).one(`SELECT token from auth_tokens WHERE username = $1`, [user]),
-});
+    getTokensForUser: (connection, user) => connection.one(`SELECT token from auth_tokens WHERE username = $1`, [user]),
+};
