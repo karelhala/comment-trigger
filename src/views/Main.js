@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
-import { Page, PageSection, PageSectionVariants, Bullseye, Title } from '@patternfly/react-core';
+import { Page, PageSection, PageSectionVariants, Bullseye, Title, Modal, Button } from '@patternfly/react-core';
 import Header from '../components/PageHeader';
 import RepositoryTabs from '../components/RepositoryTabs';
 import { onNewInstallation } from '../utils/installations';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Route, Switch, useHistory } from 'react-router-dom';
+import Detail from './Detail';
 
 const Main = () => {
     const { user } = useAuth0();
+    const history = useHistory();
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.get('code') && searchParams.get('setup_action') === 'install') {
@@ -31,9 +34,40 @@ const Main = () => {
                     </Title>
                 </Bullseye>
             </PageSection>
-            <PageSection variant={PageSectionVariants.light}>
+            <PageSection variant={PageSectionVariants.light} isFilled>
                 <RepositoryTabs onNewInstallation={onNewInstallation} />
             </PageSection>
+            <Switch>
+                <Route
+                    path={`/new-auth`}
+                    exact
+                    render={() => (
+                        <Modal
+                            variant="medium"
+                            title={`Add new auth login`}
+                            isOpen
+                            onClose={() => history.push('/')}
+                            actions={[
+                                <Button key="confirm" variant="primary" onClick={console.log}>
+                                    Confirm
+                                </Button>,
+                                <Button key="cancel" variant="link" onClick={() => history.push('/')}>
+                                    Cancel
+                                </Button>,
+                            ]}
+                        ></Modal>
+                    )}
+                />
+                <Route
+                    path={`/:repositoryName`}
+                    exact
+                    render={() => (
+                        <Modal variant="medium" title="Detail view" isOpen onClose={() => history.push('/')}>
+                            <Detail />
+                        </Modal>
+                    )}
+                />
+            </Switch>
         </Page>
     );
 };
