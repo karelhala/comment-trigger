@@ -19,7 +19,7 @@ import {
 import PlusCircleIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { Link } from 'react-router-dom';
 import LoadingBody from './LodaingBody';
-import { APP_URL } from '../utils/installations';
+import { APP_URL, GRANT_URL } from '../utils/installations';
 
 const repositoriesReducer = (acc, { name, fullName, owner, html_url }) => ({
     ...acc,
@@ -67,20 +67,8 @@ const RepositoryTabs = ({ onNewInstallation }) => {
 
     const repos = Object.entries(repositories || {});
 
-    console.log(repos, 'fff');
-
     return (
-        <Tabs
-            activeKey={activeTabKey}
-            onSelect={(_e, active) => {
-                if (active !== undefined) {
-                    setActiveTabKey(active);
-                } else {
-                    onNewInstallation();
-                }
-            }}
-            variant="light300"
-        >
+        <Tabs activeKey={activeTabKey} onSelect={(_e, active) => setActiveTabKey(active)} variant="light300">
             {!isLoading ? (
                 repos?.length > 0 ? (
                     repos.map(([key, { repos }], index) => (
@@ -136,7 +124,15 @@ const RepositoryTabs = ({ onNewInstallation }) => {
                     </Grid>
                 </Tab>
             )}
-            <Tab title={<PlusCircleIcon />} component="a" href={APP_URL} />
+            <Tab
+                title={<PlusCircleIcon />}
+                component="a"
+                href={GRANT_URL}
+                onClick={(e) => {
+                    e.preventDefault();
+                    onNewInstallation();
+                }}
+            />
         </Tabs>
     );
 };

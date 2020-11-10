@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Page, PageSection, PageSectionVariants, Bullseye, Title, Modal, Button } from '@patternfly/react-core';
 import Header from '../components/PageHeader';
 import RepositoryTabs from '../components/RepositoryTabs';
-import { onNewInstallation } from '../utils/installations';
+import { onNewInstallation, onGrantRepository } from '../utils/installations';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import Detail from './Detail';
@@ -35,7 +35,7 @@ const Main = () => {
                 </Bullseye>
             </PageSection>
             <PageSection variant={PageSectionVariants.light} isFilled>
-                <RepositoryTabs onNewInstallation={onNewInstallation} />
+                <RepositoryTabs onNewInstallation={onGrantRepository} />
             </PageSection>
             <Switch>
                 <Route

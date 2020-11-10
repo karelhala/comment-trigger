@@ -2,6 +2,7 @@ const { createAppAuth } = require('@octokit/auth-app');
 const { request } = require('@octokit/request');
 const crypto = require('crypto');
 const db = require('./db');
+const fetch = require('node-fetch');
 
 const algorithm = 'aes-192-cbc';
 
@@ -39,11 +40,68 @@ const decode = (toDecode) => {
 module.exports = {
     createNewToken: (connection) => async ({ params, body }, res) => {
         const { token } = await newAuthToken(body.code);
-        await db.setTokensForUser(connection, params.userName, encode(token));
+        await db.setTokensForUser(connection, `installation|${params.userName}`, encode(token));
         res.json({});
     },
+    refreshAccount: (connection) => async ({ params }, res) => {
+        const { access_token } = await (
+            await fetch(`https://${process.env.REACT_APP_AUTH_DOMAIN}/oauth/token`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    client_id: process.env.AUTH_CLIENT_ID,
+                    client_secret: process.env.AUTH_CLIENT_SECRET,
+                    audience: `https://${process.env.REACT_APP_AUTH_DOMAIN}/api/v2/`,
+                    grant_type: 'client_credentials',
+                }),
+            })
+        ).json();
+        const { identities, nickname } = await (
+            await fetch(`https://${process.env.REACT_APP_AUTH_DOMAIN}/api/v2/users/${params.userName}`, {
+                method: 'GET',
+                headers: {
+                    authorization: `Bearer ${access_token}`,
+                },
+            })
+        ).json();
+        const ghConnection = identities.find(({ provider }) => provider === 'github');
+        await db.setTokensForUser(connection, nickname, encode(ghConnection.access_token));
+        res.json({});
+    },
+    listEnabledGroups: (connection) => async ({ params }, res) => {
+        const { token: oauthToken } = (await db.getTokensForUser(connection, params.userName)) || {};
+        const decoded = decode(oauthToken);
+
+        const { data: orgs } = await request(`GET /user/orgs`, {
+            headers: {
+                authorization: 'bearer ' + decoded,
+            },
+        });
+
+        res.json(orgs);
+    },
+    listEnabledRepositoriesForGroup: () => async ({ params }, res) => {
+        const { token } = await auth({ type: 'app' });
+
+        const { data: installations } = await request(`GET /app/installations`, {
+            headers: {
+                authorization: 'bearer ' + token,
+            },
+        });
+
+        const { id: installationId } = installations.find(({ account: { login } } = { account: {} }) => login === params.groupName) || {};
+
+        const { token: installationToken } = await auth({ type: 'installation', installationId });
+
+        const { data: repositories } = await request(`GET /installation/repositories`, {
+            headers: {
+                authorization: 'bearer ' + installationToken,
+            },
+        });
+        res.json(repositories);
+    },
     listEnabledRepositories: (connection) => async ({ params }, res) => {
-        const { token } = (await db.getTokensForUser(connection, params.userName)) || {};
+        const { token } = (await db.getTokensForUser(connection, `installation|${params.userName}`)) || {};
         const decoded = decode(token);
         try {
             const {
