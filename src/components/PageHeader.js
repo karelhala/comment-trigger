@@ -40,6 +40,23 @@ const Header = ({ onNewInstallation }) => {
                             <DropdownItem key="new-organization" component="a" href={APP_URL} onClick={() => onNewInstallation()}>
                                 <Text>New installation</Text>
                             </DropdownItem>,
+                            <DropdownItem
+                                key="new-auth"
+                                component="button"
+                                onClick={() => {
+                                    (async () => {
+                                        await fetch(`/refresh/${user.sub}`);
+                                        history.push({
+                                            pathname: '/',
+                                            state: {
+                                                shouldRefresh: true,
+                                            },
+                                        });
+                                    })();
+                                }}
+                            >
+                                <Text>Refresh account</Text>
+                            </DropdownItem>,
                             <DropdownItem key="new-auth" component="button" onClick={() => history.push('/new-auth')}>
                                 <Text>New auth config</Text>
                             </DropdownItem>,

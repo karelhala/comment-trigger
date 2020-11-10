@@ -68,17 +68,21 @@ module.exports = {
         await db.setTokensForUser(connection, nickname, encode(ghConnection.access_token));
         res.json({});
     },
-    listEnabledGroups: (connection) => async ({ params }, res) => {
-        const { token: oauthToken } = (await db.getTokensForUser(connection, params.userName)) || {};
-        const decoded = decode(oauthToken);
+    listEnabledGroups: (connection) => async ({ params }, res, next) => {
+        try {
+            const { token: oauthToken } = (await db.getTokensForUser(connection, params.userName)) || {};
+            const decoded = decode(oauthToken);
 
-        const { data: orgs } = await request(`GET /user/orgs`, {
-            headers: {
-                authorization: 'bearer ' + decoded,
-            },
-        });
+            const { data: orgs } = await request(`GET /user/orgs`, {
+                headers: {
+                    authorization: 'bearer ' + decoded,
+                },
+            });
 
-        res.json(orgs);
+            res.json(orgs);
+        } catch (e) {
+            next(e);
+        }
     },
     listEnabledRepositoriesForGroup: () => async ({ params }, res) => {
         const { token } = await auth({ type: 'app' });
@@ -91,14 +95,18 @@ module.exports = {
 
         const { id: installationId } = installations.find(({ account: { login } } = { account: {} }) => login === params.groupName) || {};
 
-        const { token: installationToken } = await auth({ type: 'installation', installationId });
+        if (installationId) {
+            const { token: installationToken } = await auth({ type: 'installation', installationId });
 
-        const { data: repositories } = await request(`GET /installation/repositories`, {
-            headers: {
-                authorization: 'bearer ' + installationToken,
-            },
-        });
-        res.json(repositories);
+            const { data: repositories } = await request(`GET /installation/repositories`, {
+                headers: {
+                    authorization: 'bearer ' + installationToken,
+                },
+            });
+            res.json(repositories);
+        } else {
+            res.json([]);
+        }
     },
     listEnabledRepositories: (connection) => async ({ params }, res) => {
         const { token } = (await db.getTokensForUser(connection, `installation|${params.userName}`)) || {};
