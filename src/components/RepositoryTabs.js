@@ -67,11 +67,13 @@ const RepositoryTabs = ({ onNewInstallation }) => {
 
     const repos = Object.entries(repositories || {});
 
+    console.log(repos, 'fff');
+
     return (
         <Tabs
             activeKey={activeTabKey}
             onSelect={(_e, active) => {
-                if (active) {
+                if (active !== undefined) {
                     setActiveTabKey(active);
                 } else {
                     onNewInstallation();
@@ -81,8 +83,8 @@ const RepositoryTabs = ({ onNewInstallation }) => {
         >
             {!isLoading ? (
                 repos?.length > 0 ? (
-                    repos.map(([key, { repos }]) => (
-                        <Tab eventKey={0} key={key} title={<TabTitleText>{key}</TabTitleText>}>
+                    repos.map(([key, { repos }], index) => (
+                        <Tab eventKey={index} key={key} title={<TabTitleText>{key}</TabTitleText>}>
                             <Grid hasGutter className="ctc-c-repositories">
                                 {repos.map((value, itemKey) => (
                                     <GridItem key={itemKey} span={2}>
