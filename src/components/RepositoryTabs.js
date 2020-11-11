@@ -125,7 +125,14 @@ const RepositoryTabs = ({ onNewInstallation }) => {
     }
 
     return (
-        <Tabs activeKey={activeTabKey} onSelect={(_e, active) => setActiveTabKey(active)} variant="light300">
+        <Tabs
+            activeKey={activeTabKey}
+            onSelect={(_e, active) => {
+                history.push(`/${groups?.[active]?.login}`);
+                setActiveTabKey(active);
+            }}
+            variant="light300"
+        >
             {!isGroupsLoading ? (
                 groups?.map(({ login, id }, key) => (
                     <Tab eventKey={key} key={id || key} title={<TabTitleText>{login}</TabTitleText>}>
@@ -134,7 +141,7 @@ const RepositoryTabs = ({ onNewInstallation }) => {
                                 repositories?.length >= 0 ? (
                                     repositories?.map((value, itemKey) => (
                                         <GridItem key={itemKey} span={2}>
-                                            <Link to={`/${value?.name}`}>
+                                            <Link to={`/${groups?.[activeTabKey]?.login}/${value?.name}`}>
                                                 <Card>
                                                     <CardBody>{value?.name}</CardBody>
                                                 </Card>

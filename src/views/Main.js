@@ -59,7 +59,8 @@ const Main = () => {
                     )}
                 />
                 <Route
-                    path={`/:repositoryName`}
+                    path={`/:owner/:repository`}
+                    className="ct-c-reposiory__info"
                     exact
                     render={() => (
                         <Modal variant="medium" title="Detail view" isOpen onClose={() => history.push('/')}>

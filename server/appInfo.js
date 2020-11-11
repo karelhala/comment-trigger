@@ -138,4 +138,22 @@ module.exports = {
             res.json([]);
         }
     },
+    getConfigFile: (connection) => async ({ params, query }, res) => {
+        let decoded;
+        if (query && query.user) {
+            const { token: oauthToken } = (await db.getTokensForUser(connection, query.user)) || {};
+            decoded = decode(oauthToken);
+        }
+        const {
+            data: { content },
+        } = await request(`GET /repos/${params.owner}/${params.repo}/contents/.ct.config.json`, {
+            ...(decoded && {
+                headers: {
+                    authorization: 'bearer ' + decoded,
+                },
+            }),
+        });
+
+        res.json(JSON.parse(Buffer.from(content, 'base64').toString('utf8')));
+    },
 };

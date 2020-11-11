@@ -14,7 +14,7 @@ const App = () => {
         <BrowserRouter>
             <Suspense fallback={<Loading />}>
                 <Switch>
-                    <PrivateRoute path="/" component={Dashboard} />
+                    <PrivateRoute path={['/', '/:owner']} component={Dashboard} />
                 </Switch>
             </Suspense>
         </BrowserRouter>

@@ -7,7 +7,14 @@ const bootstrap = require('./webhooks');
 const db = require('./db');
 
 require('dotenv').config();
-const { listEnabledRepositories, createNewToken, refreshAccount, listEnabledGroups, listEnabledRepositoriesForGroup } = require('./appInfo');
+const {
+    listEnabledRepositories,
+    createNewToken,
+    refreshAccount,
+    listEnabledGroups,
+    listEnabledRepositoriesForGroup,
+    getConfigFile,
+} = require('./appInfo');
 
 const config = buildConfig();
 
@@ -35,6 +42,7 @@ app.use('/enabled/:userName', listEnabledRepositories(connection));
 app.use('/enabled-groups/:userName', listEnabledGroups(connection));
 app.use('/enabled-repositories/:groupName', listEnabledRepositoriesForGroup());
 app.use('/refresh/:userName', refreshAccount(connection));
+app.use('/config/:owner/:repo', getConfigFile(connection));
 bootstrap(app, {
     ...config,
     connection,
