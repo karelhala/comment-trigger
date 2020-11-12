@@ -52,7 +52,17 @@ module.exports = async ({ payload, name }) => {
     const [isPossible, rules] = await getRules(payload, name);
     if (isPossible) {
         for (let i = 0; i < rules.length; i++) {
-            console.log(rules[i], 'this is enabled!');
+            const [key, perform] = Object.entries(rules[i])[0];
+            (async () => {
+                let checker;
+                try {
+                    checker = require(`./connectors/${key}`);
+                } catch (e) {
+                    console.log(`Sorry unable to import checker ${key}!`);
+                }
+
+                checker && checker(payload, perform);
+            })();
         }
     }
 };
