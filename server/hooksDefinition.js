@@ -61,7 +61,9 @@ module.exports = async ({ payload, name }) => {
                     console.log(`Sorry unable to import checker ${key}!`);
                 }
 
-                checker && checker(payload, perform);
+                for (let x = 0; x < perform.length; x++) {
+                    checker && checker(payload, perform[x]);
+                }
             })();
         }
     }
