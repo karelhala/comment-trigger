@@ -61,7 +61,7 @@ const ConnectionTab = ({ connection, columns, variant, borders }) => {
             ...columns.map((cell, index) => {
                 if (Array.isArray(item?.[cell?.ref])) {
                     return {
-                        parent: key,
+                        parent: totalRows,
                         compoundParent: index,
                         cells: [
                             {
@@ -89,6 +89,8 @@ const ConnectionTab = ({ connection, columns, variant, borders }) => {
         totalRows = key + totalRows + calculatedRows.length;
         return calculatedRows;
     });
+
+    console.log(rows, 'fff');
 
     return (
         <Table variant={variant} borders={borders} aria-label="Compound expandable table" onExpand={onExpand} rows={rows} cells={columns}>
