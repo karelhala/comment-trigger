@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 module.exports = async ({ repository, issue, pull_request }, { actions, executor }) => {
     // TODO: use executor token
     const token = executor ? process.env.TRAVIS_TOKEN : process.env.TRAVIS_TOKEN;
-    let [owner, repo] = repository.full_name.split('/');
+    const [owner, repo] = repository.full_name.split('/');
     const { number } = issue || pull_request || {};
     for (let i = 0; i < actions.length; i++) {
         const { release_type, script, env, type = 'com', group, repo: travisRepo, ...rest } = actions[i] || {};
@@ -27,7 +27,7 @@ module.exports = async ({ repository, issue, pull_request }, { actions, executor
         try {
             fetch(travisURL, {
                 method: 'POST',
-                body,
+                body: JSON.stringify(body),
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',

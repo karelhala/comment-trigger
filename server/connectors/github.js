@@ -2,12 +2,12 @@ const { request } = require('@octokit/request');
 
 const eventMapper = {
     comment: ({ repository, issue, pull_request }, { value }) => {
-        let [owner, repo] = repository.full_name.split('/');
+        const [owner, repo] = repository.full_name.split('/');
         const { number } = issue || pull_request || {};
         return [[[`POST /repos/${owner}/${repo}/issues/${number}/comments`, { body: value }]]];
     },
     push: ({ repository }, { value, context }) => {
-        let [owner, repo] = repository.full_name.split('/');
+        const [owner, repo] = repository.full_name.split('/');
         return value.map(({ type, value, isForce }) => [
             [`GET /repos/${owner}/${repo}/git/ref/heads/${context}`],
             ...(type === 'tag'
