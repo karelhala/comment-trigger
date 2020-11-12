@@ -7,9 +7,9 @@ const mem = {};
 module.exports = {
     init: ({ dbUrl }) => {
         let connection;
-        connection = getDb(dbUrl);
         (async () => {
             try {
+                connection = getDb(dbUrl);
                 await connection.query(
                     `CREATE TABLE IF NOT EXISTS auth_tokens (
                             username varchar(80) PRIMARY KEY,

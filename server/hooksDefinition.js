@@ -41,7 +41,7 @@ const getRules = async ({ sender, repository, action, ...rest }, type) => {
                 .filter(({ events }) =>
                     events.some((event) => event.type === type && event.actions.includes(action) && conditionChecker(event.conditions, rest))
                 )
-                .map(({ actions }) => actions),
+                .map(({ actions, executor }) => ({ actions, executor })),
         }));
     }
 
