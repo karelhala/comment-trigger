@@ -1,6 +1,7 @@
 const { Webhooks } = require('@octokit/webhooks');
 const LRUCache = require('lru-cache');
 const hooks = require('./hooksDefinition');
+
 module.exports = (app, config) => {
     if (config.webhookProxyUrl) {
         const SmeeClient = require('smee-client');
@@ -24,7 +25,9 @@ module.exports = (app, config) => {
         },
     });
 
-    Object.entries(hooks).forEach(([key, callback]) => webhooks.on(key, (hook) => callback(hook, app)));
+    // Object.entries(hooks).forEach(([key, callback]) => webhooks.on(key, (hook) => callback(hook, app)));
+
+    webhooks.onAny((hook) => hooks(hook, app));
 
     app.use(config.webhooksPath, webhooks.middleware);
 };

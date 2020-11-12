@@ -51,6 +51,7 @@
     "lru-cache": "^6.0.0",
     "morgan": "^1.10.0",
     "node-sass": "^4.14.1",
+    "object-path": "^0.11.5",
     "pg-promise": "^10.7.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
