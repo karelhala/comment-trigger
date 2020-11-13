@@ -116,7 +116,7 @@ module.exports = {
                 data: { installations },
             } = await request(`GET /user/installations`, {
                 headers: {
-                    authorization: `token ${decoded || process.env.TEST_TOKEN}`,
+                    authorization: `token ${decoded || process.env.GH_APP_TOKEN}`,
                 },
             });
 
@@ -126,7 +126,7 @@ module.exports = {
                         data: { repositories },
                     } = await request(`GET /user/installations/${id}/repositories`, {
                         headers: {
-                            authorization: `token ${decoded || process.env.TEST_TOKEN}`,
+                            authorization: `token ${decoded || process.env.GH_APP_TOKEN}`,
                         },
                     });
                     return repositories;

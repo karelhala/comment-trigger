@@ -2,68 +2,66 @@ const fetch = require('node-fetch');
 const { createCheckRun, updateCheckRun } = require('../run-check');
 
 module.exports = async ({ repository, issue, pull_request }, { actions, executor, ...data }) => {
+    // TODO: use executor token
     const token = executor ? process.env.TRAVIS_TOKEN : process.env.TRAVIS_TOKEN;
     const [owner, repo] = repository.full_name.split('/');
     const { number } = issue || pull_request || {};
     for (let i = 0; i < actions.length; i++) {
-        const { release_type, headers, branch = 'main', tag, params, csvSlug = 'gh', group, repo: circleRepo, ...rest } = actions[i] || {};
-        const body = {
-            ...(!tag
-                ? {
-                      branch,
-                  }
-                : tag),
-            parameters: {
-                PR_NUMBER: number,
-                RELEASE_TYPE: release_type,
-                ...params,
-            },
-            ...rest,
-        };
-
-        const circleCiURL = `https://circleci.com/api/v2/project/${csvSlug}/${group || owner}/${circleRepo || repo}/pipeline`;
-
+        const { release_type, script, env, type = 'com', group, repo: travisRepo, ...rest } = actions[i] || {};
+        const travisURL = `https://api.travis-ci.${type}/repo/${group || owner}%2F${travisRepo || repo}/requests`;
         const runData = {
-            name: 'Circle CI trigger',
-            title: 'Running new Circle CI task',
+            name: 'Travis trigger',
+            title: 'Running new travis ',
             summary: 'Taks is currently running:',
             description: `
-            Running Circle CI task on url ${circleCiURL}
+            Running travis task on url ${travisURL}
             <details>
             <summary>Using these variabes!</summary>
 \`\`\`
 release_type: ${release_type}
-branch: ${branch}
-tag: ${tag}
-csvSlug: ${csvSlug}
+script: ${script}
+type: ${type}
 group: ${group || owner}
-repo: ${circleRepo || repo}
-headers: ${Object.entries(headers || {})
+repo: ${travisRepo || repo}
+env: ${Object.entries(env || {})
                 .map(([key, val]) => `${key} => ${val}`)
                 .join(', ')}
-params: ${Object.entries(params || {})
-                .map(([key, val]) => `${key} => ${val}`)
-                .join(', ')}
+${Object.entries(rest || {})
+    .map(([key, val]) => `${key} => ${val}`)
+    .join(', ')}
 \`\`\`
 </details>
             `,
         };
         const { id } = await createCheckRun({ repository }, { executor, ...runData, ...data });
-
-        console.log(`Notifyig travis on URL: ${circleCiURL}`);
-        console.log(`With data: ${JSON.stringify(body)}`);
-
-        try {
-            fetch(circleCiURL, {
-                method: 'POST',
-                headers: {
-                    ...headers,
-                    'content-type': 'application/json',
-                    'Circle-Token': token,
+        const body = {
+            request: {
+                config: {
+                    env: {
+                        PR_NUMBER: number,
+                        RELEASE_TYPE: release_type,
+                        ...env,
+                    },
+                    script: script || 'npm run release:api',
+                    ...rest,
                 },
+            },
+        };
+
+        console.log(`Notifyig travis on URL: ${travisURL}`);
+        console.log(`With data: ${JSON.stringify(body)}`);
+        try {
+            fetch(travisURL, {
+                method: 'POST',
                 body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'Travis-API-Version': 3,
+                    Authorization: `token ${token}`,
+                },
             });
-            runData.summary = 'Task succeded';
+            runData.summary = 'Task succeeded';
             updateCheckRun({ repository }, { executor, ...runData, ...data, result: 'success', checkRunId: id });
         } catch (e) {
             console.log(e);

@@ -56,8 +56,9 @@ module.exports = async ({ payload, name }) => {
             (async () => {
                 let checker;
                 try {
-                    checker = require(`./connectors/${key}`);
+                    checker = await require(`./connectors/${key}`);
                 } catch (e) {
+                    console.log(e);
                     console.log(`Sorry unable to import checker ${key}!`);
                 }
 
