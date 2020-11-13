@@ -19,19 +19,19 @@ const newAuthToken = (code) =>
         code,
     });
 
-const encode = (toEncode) => {
-    const iv = crypto.randomBytes(parseInt(process.env.IV_LENGTH, 10));
-    const cypher = crypto.createCipheriv(algorithm, crypto.scryptSync(process.env.TOKEN_PWD, 'GfG', 24), iv);
+const encode = (toEncode, secret = process.env.TOKEN_PWD, ivLength = process.env.IV_LENGTH) => {
+    const iv = crypto.randomBytes(parseInt(ivLength, 10));
+    const cypher = crypto.createCipheriv(algorithm, crypto.scryptSync(secret, 'GfG', 24), iv);
     let encoded = cypher.update(toEncode, 'utf8', 'hex');
     encoded += cypher.final('hex');
     return `${iv.toString('hex')}:${encoded}`;
 };
 
-const decode = (toDecode) => {
+const decode = (toDecode, secret = process.env.TOKEN_PWD) => {
     const textParts = toDecode.split(':');
     const iv = Buffer.from(textParts.shift(), 'hex');
     const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv(algorithm, crypto.scryptSync(process.env.TOKEN_PWD, 'GfG', 24), iv);
+    const decipher = crypto.createDecipheriv(algorithm, crypto.scryptSync(secret, 'GfG', 24), iv);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();
@@ -155,5 +155,16 @@ module.exports = {
         });
 
         res.json(JSON.parse(Buffer.from(content, 'base64').toString('utf8')));
+    },
+    encryptToken: (connection) => async ({ body }, res) => {
+        const { secret, accName, repoSlug = '', type = 'github' } = body;
+        const key = crypto.randomBytes(32).toString('hex');
+        await db.setTokensForUser(connection, `secret|${accName}|${type}${repoSlug ? `|${repoSlug}` : ''}`, encode(key));
+        res.json(encode(secret, key));
+    },
+    decryptToken: (connection) => async ({ body }, res) => {
+        const { encrypted, accName, repoSlug = '', type = 'github' } = body;
+        const { token: key } = await db.getTokensForUser(connection, `secret|${accName}|${type}${repoSlug ? `|${repoSlug}` : ''}`);
+        res.json(decode(encrypted, decode(key)));
     },
 };

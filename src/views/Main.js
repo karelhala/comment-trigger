@@ -6,6 +6,7 @@ import { onNewInstallation, onGrantRepository } from '../utils/installations';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import Detail from './Detail';
+import NewToken from './NewToken';
 
 const Main = () => {
     const { user } = useAuth0();
@@ -42,20 +43,9 @@ const Main = () => {
                     path={`/new-auth`}
                     exact
                     render={() => (
-                        <Modal
-                            variant="medium"
-                            title={`Add new auth login`}
-                            isOpen
-                            onClose={() => history.push('/')}
-                            actions={[
-                                <Button key="confirm" variant="primary" onClick={console.log}>
-                                    Confirm
-                                </Button>,
-                                <Button key="cancel" variant="link" onClick={() => history.push('/')}>
-                                    Cancel
-                                </Button>,
-                            ]}
-                        ></Modal>
+                        <Modal variant="medium" title={`Add new auth login`} isOpen onClose={() => history.push('/')}>
+                            <NewToken />
+                        </Modal>
                     )}
                 />
                 <Route

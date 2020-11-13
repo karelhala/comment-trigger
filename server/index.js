@@ -14,6 +14,8 @@ const {
     listEnabledGroups,
     listEnabledRepositoriesForGroup,
     getConfigFile,
+    encryptToken,
+    decryptToken,
 } = require('./appInfo');
 
 const config = buildConfig();
@@ -43,6 +45,8 @@ app.use('/enabled-groups/:userName', listEnabledGroups(connection));
 app.use('/enabled-repositories/:groupName', listEnabledRepositoriesForGroup());
 app.use('/refresh/:userName', refreshAccount(connection));
 app.use('/config/:owner/:repo', getConfigFile(connection));
+app.use('/encrypt/token', encryptToken(connection));
+app.use('/decrypt/token', decryptToken(connection));
 bootstrap(app, {
     ...config,
     connection,
